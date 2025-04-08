@@ -15,6 +15,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
+
 </head>
 
 <style>
@@ -78,6 +80,53 @@
     .nav-link.active {
         background-color: rgba(255, 255, 255, 0.2);
         color: white !important;
+    }
+
+    /* Auth Buttons */
+    .auth-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-auth {
+        padding: 0.5rem 1.25rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-login {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-login:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-register {
+        background-color: white;
+        color: #3b82f6 !important;
+        border: none;
+    }
+
+    .btn-register:hover {
+        background-color: #f8fafc;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-logout {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: white !important;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-logout:hover {
+        background-color: rgba(239, 68, 68, 0.3);
+        transform: translateY(-2px);
     }
 
     /* Notification Styling */
@@ -146,6 +195,8 @@
     /* Container Styling */
     .container {
         padding: 2rem 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     /* Card Styling */
@@ -155,6 +206,7 @@
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         overflow: hidden;
         transition: all 0.3s ease;
+        height: 100%;
     }
 
     .card:hover {
@@ -226,7 +278,41 @@
         width: 100%;
     }
 
+    /* User Dropdown */
+    .user-dropdown .dropdown-menu {
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: none;
+        padding: 0.5rem;
+        min-width: 200px;
+    }
+
+    .user-dropdown .dropdown-item {
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .user-dropdown .dropdown-item:hover {
+        background-color: #f1f5f9;
+    }
+
+    .user-dropdown .dropdown-divider {
+        margin: 0.5rem 0;
+    }
+
     /* Responsive Adjustments */
+    @media (max-width: 992px) {
+        .navbar-nav {
+            padding: 1rem 0;
+        }
+        
+        .auth-buttons {
+            margin-top: 1rem;
+            justify-content: center;
+        }
+    }
+
     @media (max-width: 768px) {
         .navbar-brand {
             font-size: 1.25rem;
@@ -253,7 +339,7 @@
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/home">
+            <a class="navbar-brand" href="/">
                 <i class="bi bi-coin"></i>
                 FundTracker
             </a>
@@ -262,6 +348,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
+                    @auth
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('home') ? 'active' : '' }}" href="{{ route('home') }}">
                             <i class="bi bi-house-door me-1"></i> Dashboard
@@ -292,41 +379,76 @@
                             <i class="bi bi-bell me-1"></i> Peringatan
                         </a>
                     </li>
+                    @endauth
                 </ul>
-                <div class="notification">
-                    <a href="#" class="nav-link position-relative" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bell-fill fs-5"></i>
-                        @if($unpaidReminders->count() > 0)
-                            <span class="badge">{{ $unpaidReminders->count() }}</span>
-                        @endif
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown">
-                        <div class="dropdown-header">Notifikasi</div>
-                        @if($unpaidReminders->count() > 0)
-                            @foreach ($unpaidReminders as $reminder)
-                                <a class="dropdown-item" href="{{ route('reminders.index') }}">
-                                    <div class="notification-title">
-                                        <i class="bi bi-bell-fill text-warning"></i>
-                                        {{ $reminder->title }}
-                                    </div>
-                                    <div class="notification-time">
-                                        {{ \Carbon\Carbon::parse($reminder->reminder_date)->format('d M, Y') }}
-                                    </div>
-                                </a>
-                            @endforeach
-                        @else
-                            <div class="dropdown-item no-notifications">
-                                <i class="bi bi-check2-circle fs-4 d-block mb-2"></i>
-                                Tidak ada pengingat baru
-                            </div>
-                        @endif
+                
+                <div class="d-flex align-items-center">
+                    @auth
+                    <div class="notification me-3">
+                        <a href="#" class="nav-link position-relative" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell-fill fs-5"></i>
+                            @if($unpaidReminders->count() > 0)
+                                <span class="badge">{{ $unpaidReminders->count() }}</span>
+                            @endif
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown">
+                            <div class="dropdown-header">Notifikasi</div>
+                            @if($unpaidReminders->count() > 0)
+                                @foreach ($unpaidReminders as $reminder)
+                                    <a class="dropdown-item" href="{{ route('reminders.index') }}">
+                                        <div class="notification-title">
+                                            <i class="bi bi-bell-fill text-warning"></i>
+                                            {{ $reminder->title }}
+                                        </div>
+                                        <div class="notification-time">
+                                            {{ \Carbon\Carbon::parse($reminder->reminder_date)->format('d M, Y') }}
+                                        </div>
+                                    </a>
+                                @endforeach
+                            @else
+                                <div class="dropdown-item no-notifications">
+                                    <i class="bi bi-check2-circle fs-4 d-block mb-2"></i>
+                                    Tidak ada pengingat baru
+                                </div>
+                            @endif
+                        </div>
                     </div>
+                    
+                    <div class="user-dropdown dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                    <span class="fw-bold">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                                </div>
+                                <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Pengaturan</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Keluar
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    @else
+                    <div class="auth-buttons">
+                        <a href="{{ route('login') }}" class="btn btn-auth btn-login">Masuk</a>
+                        <a href="{{ route('register') }}" class="btn btn-auth btn-register">Daftar</a>
+                    </div>
+                    @endauth
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container py-4">
         @yield('content')
     </div>
 

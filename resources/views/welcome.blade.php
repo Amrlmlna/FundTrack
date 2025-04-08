@@ -144,6 +144,7 @@
         .navbar-menu {
             display: flex;
             list-style: none;
+            align-items: center;
         }
 
         .navbar-item {
@@ -176,8 +177,41 @@
             width: 100%;
         }
 
-        .navbar-button {
+        /* Auth Buttons */
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
             margin-left: 2rem;
+        }
+
+        .btn-auth {
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-login:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-register {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-register:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .mobile-menu-toggle {
@@ -756,7 +790,7 @@
                 margin: 1rem 0;
             }
 
-            .navbar-button {
+            .auth-buttons {
                 margin: 1rem 0;
             }
 
@@ -796,9 +830,10 @@
                 <li class="navbar-item">
                     <a href="#contact" class="navbar-link">Contact</a>
                 </li>
-                <li class="navbar-button">
-                    <a href="/login" class="btn btn-primary">Login</a>
-                </li>
+                <div class="auth-buttons">
+                    <a href="{{ route('login') }}" class="btn-auth btn-login">Login</a>
+                    <a href="{{ route('register') }}" class="btn-auth btn-register">Register</a>
+                </div>
             </ul>
             <div class="mobile-menu-toggle">
                 <i class="bi bi-list"></i>
@@ -817,8 +852,12 @@
                     Platform manajemen keuangan yang membantu Anda mengatur, menganalisis, dan merencanakan keuangan pribadi dengan mudah.
                 </p>
                 <div class="hero-buttons">
-                    <a href="/pendapatan" class="btn btn-primary">Mulai Sekarang</a>
-                    <a href="#features" class="btn btn-outline">Pelajari Lebih Lanjut</a>
+                    @auth
+                        <a href="{{ route('home') }}" class="btn btn-primary">Dashboard</a>
+                    @else
+                        <a href="{{ route('register') }}" class="btn btn-primary">Mulai Sekarang</a>
+                        <a href="#features" class="btn btn-outline">Pelajari Lebih Lanjut</a>
+                    @endauth
                 </div>
             </div>
             <div class="hero-image">
