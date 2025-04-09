@@ -851,7 +851,7 @@
                 </p>
                 <div class="hero-buttons">
                     @auth
-                        <a href="{{ route('home') }}" class="btn btn-primary">Dashboard</a>
+                        <a href="{{ route('reminders.index') }}" class="btn btn-primary">Dashboard</a>
                     @else
                         <a href="{{ route('register') }}" class="btn btn-primary">Mulai Sekarang</a>
                         <a href="#features" class="btn btn-outline">Pelajari Lebih Lanjut</a>
