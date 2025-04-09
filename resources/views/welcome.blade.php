@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Finance - Kelola Keuangan Anda dengan Cerdas</title>
+    <title>FundTracker - Kelola Keuangan Anda dengan Cerdas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -280,13 +280,11 @@
 
         .hero-image {
             position: relative;
-            width: 45%;
+            width: 50%;
         }
 
         .hero-image img {
             width: 100%;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
             animation: float 6s ease-in-out infinite;
         }
 
@@ -815,7 +813,7 @@
         <div class="container navbar-container">
             <a href="#" class="navbar-logo">
                 <i class="bi bi-coin"></i>
-                Smart Finance
+                FundTracker
             </a>
             <ul class="navbar-menu">
                 <li class="navbar-item">
@@ -861,7 +859,7 @@
                 </div>
             </div>
             <div class="hero-image">
-                <img src="https://img.freepik.com/premium-vector/diverse-group-celebrates-success-business-competition-showcasing-trophies-while-standing-podiums-urban-environment_538213-123486.jpg" alt="Financial Growth">
+            <img src="{{ asset('3dModel.gif') }}" alt="3D Animation" style="width: 700px; height: auto;" />
             </div>
         </div>
         <div class="hero-shape hero-shape-1"></div>
@@ -912,12 +910,12 @@
     <section id="about" class="section about">
         <div class="container about-container">
             <div class="about-image">
-                <img src="https://img.freepik.com/premium-vector/diverse-group-celebrates-success-business-competition-showcasing-trophies-while-standing-podiums-urban-environment_538213-123486.jpg" alt="Financial Growth">
+            <img src="{{ asset('about.png') }}" alt="3D Animation" />
             </div>
             <div class="about-content">
                 <h2 class="about-title">Tentang Platform Kami</h2>
                 <p class="about-description">
-                    Smart Finance adalah platform manajemen keuangan pribadi yang dirancang untuk membantu Anda mencapai kebebasan finansial. Kami menyediakan alat dan wawasan yang Anda butuhkan untuk mengatur, menganalisis, dan merencanakan keuangan Anda dengan lebih efektif.
+                    FundTracker adalah platform manajemen keuangan pribadi yang dirancang untuk membantu Anda mencapai kebebasan finansial. Kami menyediakan alat dan wawasan yang Anda butuhkan untuk mengatur, menganalisis, dan merencanakan keuangan Anda dengan lebih efektif.
                 </p>
                 <div class="about-features">
                     <div class="about-feature">
@@ -1000,7 +998,7 @@
                         <div class="contact-item-content">
                             <h4 class="contact-item-title">Email</h4>
                             <p class="contact-item-description">
-                                info@smartfinance.com
+                                info@FundTracker.com
                             </p>
                         </div>
                     </div>
@@ -1047,7 +1045,7 @@
             <div>
                 <a href="#" class="footer-logo">
                     <i class="bi bi-coin"></i>
-                    Smart Finance
+                    FundTracker
                 </a>
                 <p class="footer-description">
                     Platform manajemen keuangan pribadi yang membantu Anda mencapai kebebasan finansial.
@@ -1096,7 +1094,7 @@
                 <div class="footer-contact">
                     <i class="bi bi-envelope footer-contact-icon"></i>
                     <p class="footer-contact-text">
-                        info@smartfinance.com
+                        info@FundTracker.com
                     </p>
                 </div>
                 <div class="footer-contact">
@@ -1108,7 +1106,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 Smart Finance. All rights reserved.</p>
+            <p>&copy; 2024 FundTracker. All rights reserved.</p>
         </div>
     </footer>
 

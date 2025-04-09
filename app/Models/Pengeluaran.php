@@ -11,6 +11,7 @@ class Pengeluaran extends Model
 
     // Menambahkan properti fillable untuk mass assignment
     protected $fillable = [
+        'user_id',
         'kategori_id',
         'jumlah',
         'deskripsi',

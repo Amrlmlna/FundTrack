@@ -7,64 +7,71 @@ use App\Models\Reminder;
 use App\Models\Pendapatan;
 use App\Models\Pengeluaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LaporanController extends Controller
 {
     public function index()
     {
-        $unpaidReminders = Reminder::where('is_paid', false)->get();
+        $userId = Auth::id();
+        $unpaidReminders = Reminder::where('user_id', $userId)->where('is_paid', false)->get();
         return view('laporan.index', compact('unpaidReminders'));
     }
-    
+
     public function generate(Request $request)
     {
+        $userId = Auth::id();
         $startDate = Carbon::parse($request->start_date);
         $endDate = Carbon::parse($request->end_date);
-    
-        // Mengambil pendapatan dan pengeluaran dalam rentang tanggal
-        $pendapatan = Pendapatan::whereBetween('tanggal', [$startDate, $endDate])->get();
-        $pengeluaran = Pengeluaran::whereBetween('tanggal', [$startDate, $endDate])->get();
-    
-        // Menghitung total pendapatan dan pengeluaran
+
+        $pendapatan = Pendapatan::where('user_id', $userId)->whereBetween('tanggal', [$startDate, $endDate])->get();
+        $pengeluaran = Pengeluaran::where('user_id', $userId)->whereBetween('tanggal', [$startDate, $endDate])->get();
+
         $totalPendapatan = $pendapatan->sum('jumlah');
         $totalPengeluaran = $pengeluaran->sum('jumlah');
-    
-        // Menghitung saldo bulan lalu
+
         $previousMonthStart = Carbon::now()->subMonth()->startOfMonth();
         $previousMonthEnd = Carbon::now()->subMonth()->endOfMonth();
-    
-        $pendapatanBulanLalu = Pendapatan::whereBetween('tanggal', [$previousMonthStart, $previousMonthEnd])->sum('jumlah');
-        $pengeluaranBulanLalu = Pengeluaran::whereBetween('tanggal', [$previousMonthStart, $previousMonthEnd])->sum('jumlah');
-        
+
+        $pendapatanBulanLalu = Pendapatan::where('user_id', $userId)->whereBetween('tanggal', [$previousMonthStart, $previousMonthEnd])->sum('jumlah');
+        $pengeluaranBulanLalu = Pengeluaran::where('user_id', $userId)->whereBetween('tanggal', [$previousMonthStart, $previousMonthEnd])->sum('jumlah');
+
         $saldoBulanLalu = $pendapatanBulanLalu - $pengeluaranBulanLalu;
-    
-        // Menghitung saldo sekarang
         $saldoSekarang = $totalPendapatan - $totalPengeluaran;
-    
-        $unpaidReminders = Reminder::where('is_paid', false)->get();
-        
-        return view('laporan.index', compact('pendapatan', 'pengeluaran', 'totalPendapatan', 'totalPengeluaran', 'unpaidReminders', 'saldoBulanLalu', 'saldoSekarang'));
+
+        $unpaidReminders = Reminder::where('user_id', $userId)->where('is_paid', false)->get();
+
+        return view('laporan.index', compact(
+            'pendapatan',
+            'pengeluaran',
+            'totalPendapatan',
+            'totalPengeluaran',
+            'unpaidReminders',
+            'saldoBulanLalu',
+            'saldoSekarang'
+        ));
     }
 
     public function chart(Request $request)
     {
+        $userId = Auth::id();
         $startDate = Carbon::parse($request->start_date);
         $endDate = Carbon::parse($request->end_date);
-    
+
         $labels = [];
         $pendapatanData = [];
         $pengeluaranData = [];
-    
-        // Mendapatkan data per hari dalam rentang waktu
+
         $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
-    
+
         foreach ($period as $date) {
             $labels[] = $date->format('Y-m-d');
-            $pendapatanData[] = Pendapatan::whereDate('tanggal', $date)->sum('jumlah');
-            $pengeluaranData[] = Pengeluaran::whereDate('tanggal', $date)->sum('jumlah');
+            $pendapatanData[] = Pendapatan::where('user_id', $userId)->whereDate('tanggal', $date)->sum('jumlah');
+            $pengeluaranData[] = Pengeluaran::where('user_id', $userId)->whereDate('tanggal', $date)->sum('jumlah');
         }
-        $unpaidReminders = Reminder::where('is_paid', false)->get();
+
+        $unpaidReminders = Reminder::where('user_id', $userId)->where('is_paid', false)->get();
+
         return view('laporan.chart', compact('labels', 'pendapatanData', 'pengeluaranData', 'unpaidReminders'));
     }
-    
 }

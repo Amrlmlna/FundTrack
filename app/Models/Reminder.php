@@ -10,6 +10,7 @@ class Reminder extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'title',
         'reminder_date',
         'is_paid', // status apakah pengingat sudah dibayar

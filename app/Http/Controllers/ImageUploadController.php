@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Image; // Pastikan model ini ada dan sesuai
+use Illuminate\Support\Facades\Auth;
 
 class ImageUploadController extends Controller 
 {
@@ -20,9 +21,10 @@ class ImageUploadController extends Controller
 
         // Jika Anda ingin menyimpan path gambar ke dalam database
         Image::create([
-            'filename' => $path // Menyimpan path gambar ke kolom 'filename'
+            'user_id' => Auth::id(), // user_id harus ada di tabel images
+            'filename' => $path
         ]);
-
+        
         // Mengembalikan ke halaman sebelumnya dengan pesan sukses
         return back()->with('success', 'Gambar berhasil diupload!');
     }

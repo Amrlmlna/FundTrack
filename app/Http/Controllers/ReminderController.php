@@ -8,90 +8,99 @@ use App\Models\Pendapatan;
 use App\Models\Pengeluaran;
 use App\Models\BalanceAlert;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class ReminderController extends Controller
 {
 
     public function index()
-    {
-        $currentMonth = Carbon::now()->month;
-        $reminders = Reminder::whereMonth('reminder_date', $currentMonth)->get();
-        $unpaidReminders = Reminder::where('is_paid', false)
-            ->whereMonth('reminder_date', $currentMonth)
-            ->get();
-        $balanceAlerts = BalanceAlert::all();
+{
+    $userId = Auth::id();
+    $currentMonth = Carbon::now()->month;
 
-        // Menghitung total pendapatan dan pengeluaran
-        $totalPendapatan = Pendapatan::sum('jumlah');
-        $totalPengeluaran = Pengeluaran::sum('jumlah');
+    $reminders = Reminder::where('user_id', $userId)
+        ->whereMonth('reminder_date', $currentMonth)
+        ->get();
 
-        // Menghitung saldo
-        $saldo = $totalPendapatan - $totalPengeluaran;
+    $unpaidReminders = Reminder::where('user_id', $userId)
+        ->where('is_paid', false)
+        ->whereMonth('reminder_date', $currentMonth)
+        ->get();
 
-        // Cek peringatan batas keuangan
-        foreach ($balanceAlerts as $alert) {
-            if ($saldo <= $alert->threshold_amount && !$alert->is_alerted) {
-                $alert->is_alerted = true;
-                $alert->save();
-            }
+    $balanceAlerts = BalanceAlert::where('user_id', $userId)->get();
+
+    $totalPendapatan = Pendapatan::where('user_id', $userId)->sum('jumlah');
+    $totalPengeluaran = Pengeluaran::where('user_id', $userId)->sum('jumlah');
+
+    $saldo = $totalPendapatan - $totalPengeluaran;
+
+    foreach ($balanceAlerts as $alert) {
+        if ($saldo <= $alert->threshold_amount && !$alert->is_alerted) {
+            $alert->is_alerted = true;
+            $alert->save();
         }
-        $unpaidReminders = Reminder::where('is_paid', false)->get();
-        return view('reminders.index', compact('reminders', 'balanceAlerts', 'saldo', 'unpaidReminders'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'reminder_date' => 'required|date',
-        ]);
+    return view('reminders.index', compact('reminders', 'balanceAlerts', 'saldo', 'unpaidReminders'));
+}
 
-        Reminder::create($request->all());
-        return redirect()->back()->with('success', 'Pengingat berhasil ditambahkan!');
-    }
 
-    public function markAsPaid($id)
-    {
-        $reminder = Reminder::findOrFail($id);
-        $reminder->is_paid = true;
-        $reminder->save();
+public function store(Request $request)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'reminder_date' => 'required|date',
+    ]);
 
-        return redirect()->back()->with('success', 'Peringatan berhasil ditandai sebagai dibayar.');
-    }
+    Reminder::create([
+        'title' => $request->title,
+        'reminder_date' => $request->reminder_date,
+        'user_id' => Auth::id(),
+    ]);
 
+    return redirect()->back()->with('success', 'Pengingat berhasil ditambahkan!');
+}
 
     public function storeBalanceAlert(Request $request)
-    {
-        $request->validate([
-            'threshold_amount' => 'required|numeric',
-        ]);
+{
+    $request->validate([
+        'threshold_amount' => 'required|numeric',
+    ]);
 
-        BalanceAlert::create([
-            'threshold_amount' => $request->threshold_amount,
-        ]);
+    BalanceAlert::create([
+        'threshold_amount' => $request->threshold_amount,
+        'user_id' => Auth::id(),
+    ]);
 
-        return redirect()->back()->with('success', 'Batas keuangan berhasil disimpan.');
-    }
+    return redirect()->back()->with('success', 'Batas keuangan berhasil disimpan.');
+}
 
-    public function destroy($id)
-    {
-        $reminder = Reminder::findOrFail($id);
-        $reminder->delete();
 
-        return redirect()->back()->with('success', 'Peringatan berhasil dibatalkan.');
-    }
+public function destroy($id)
+{
+    $reminder = Reminder::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+    $reminder->delete();
 
-    public function cancelBalanceAlert(Request $request)
-    {
-        return redirect()->back()->with('success', 'Peringatan batas saldo berhasil dibatalkan.');
-    }
+    return redirect()->back()->with('success', 'Peringatan berhasil dibatalkan.');
+}
 
-    public function markAsUnpaid($id)
-    {
-        $reminder = Reminder::findOrFail($id);
-        $reminder->is_paid = false;
-        $reminder->save();
+public function markAsPaid($id)
+{
+    $reminder = Reminder::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+    $reminder->is_paid = true;
+    $reminder->save();
 
-        return redirect()->back()->with('success', 'Status pengingat telah dibatalkan.');
-    }
+    return redirect()->back()->with('success', 'Peringatan berhasil ditandai sebagai dibayar.');
+}
+
+public function markAsUnpaid($id)
+{
+    $reminder = Reminder::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+    $reminder->is_paid = false;
+    $reminder->save();
+
+    return redirect()->back()->with('success', 'Status pengingat telah dibatalkan.');
+}
+
 }

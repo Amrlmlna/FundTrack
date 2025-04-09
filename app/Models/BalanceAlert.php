@@ -10,6 +10,7 @@ class BalanceAlert extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'threshold_amount',
         'is_alerted',
     ];
